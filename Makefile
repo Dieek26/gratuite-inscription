@@ -1,5 +1,6 @@
 stack_name = gratuite_inscription
 source_tag = dev
+php_image_name = github.com/Dieek26/gratuite-inscription/php-fpm
 
 php_sources = src/
 php_container_id = $(shell docker ps --filter name="$(stack_name)_php" -q)
@@ -68,10 +69,17 @@ encore-production:
 # IMAGES
 .PHONY: build-image
 build-image:
-	docker build --target=$(source_tag) -t gitlab-registry.eyrolles.com/honyasan/product-manager/php-fpm:$(source_tag) -f .docker/php/Dockerfile .
-	docker build --target=supervisord-$(source_tag) -t gitlab-registry.eyrolles.com/honyasan/product-manager/php-supervisord:$(source_tag) -f .docker/php/Dockerfile .
+	docker build --target=$(source_tag) -t $(php_image_name):$(source_tag) -f .docker/php/Dockerfile .
 
 .PHONY: push-image
 push-image:
-	docker push gitlab-registry.eyrolles.com/honyasan/product-manager/php-fpm:$(source_tag)
-	docker push gitlab-registry.eyrolles.com/honyasan/product-manager/php-supervisord:$(source_tag)
+	docker push $(php_image_name):$(source_tag)
+
+# PROJECT
+.PHONY: start
+start:
+	docker stack deploy -c .docker/docker-compose.yaml $(stack_name)
+
+.PHONY: stop
+stop:
+	docker stack rm $(stack_name)

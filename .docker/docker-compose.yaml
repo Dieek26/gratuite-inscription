@@ -3,102 +3,56 @@ version: '3.9'
 
 services:
 
-  php:
-    image: gitlab-registry.eyrolles.com/honyasan/product-manager/php-fpm:dev
-    configs:
-      - source: php_conf
-        target: /usr/local/etc/php/php.ini
-      - source: fpm_healthcheck_conf
-        target: /usr/local/etc/php-fpm.d/healthcheck.conf
-    volumes:
-      - /etc/timezone:/etc/timezone:ro
-      - /etc/localtime:/etc/localtime:ro
-      - /home/gabriel/Workspace/Eyrolles/Honyasan/ProductManager:/var/www/product_manager
-      - composer:/var/www/.composer
-    environment:
-      - APP_ENV=dev
-      - APP_DEBUG=1
-    networks:
-      fastcgi: ~
-      eyrolles_honyasan_common_redis_session_public: ~
-      eyrolles_honyasan_common_postgres_public: ~
-      eyrolles_honyasan_common_minio_public: ~
-      eyrolles_honyasan_common_elasticsearch_public: ~
-      eyrolles_honyasan_common_rabbitmq_public: ~
-
   nginx:
-    image: nginx
+    image: nginx:latest
     deploy:
       labels:
         - traefik.enable=true
         - traefik.docker.network=traefik_reverse_proxy
         - traefik.docker.lbswarm=true
-        - traefik.http.services.eyrolles_honyasan_product-manager-nginx.loadbalancer.server.port=80
-        - traefik.http.routers.eyrolles_honyasan_product-manager-nginx.entryPoints=web
-        - traefik.http.routers.eyrolles_honyasan_product-manager-nginx.rule=Host(`product-manager.eyrolles.docker`)
-        - traefik.http.routers.eyrolles_honyasan_product-manager-nginx-https.entrypoints=websecure
-        - traefik.http.routers.eyrolles_honyasan_product-manager-nginx-https.rule=Host(`product-manager.eyrolles.docker`)
-        - traefik.http.routers.eyrolles_honyasan_product-manager-nginx-https.tls.certresolver=letsencrypt
+        - traefik.http.services.gratuite_inscription-nginx.loadbalancer.server.port=80
+        - traefik.http.routers.gratuite_inscription-nginx.entryPoints=web
+        - traefik.http.routers.gratuite_inscription-nginx.rule=Host(`gratuite-inscription.docker`)
+        - traefik.http.routers.gratuite_inscription-nginx-https.entrypoints=websecure
+        - traefik.http.routers.gratuite_inscription-nginx-https.rule=Host(`gratuite-inscription.docker`)
+        - traefik.http.routers.gratuite_inscription-nginx-https.tls.certresolver=letsencrypt
     configs:
       - source: nginx_conf
         target: /etc/nginx/conf.d/default.conf
     volumes:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
-      - /home/gabriel/Workspace/Eyrolles/Honyasan/ProductManager/public:/var/www/product_manager/public
-    healthcheck:
-      test: "curl --head -s http://localhost/ping | head -n1 | grep 'HTTP/1.1 200 OK' > /dev/null"
-      interval: 5s
-      timeout: 15s
-      retries: 1
+#      - ../public:/var/www/app/public
     networks:
       fastcgi: ~
-      public:
-        aliases:
-          - product-manager.eyrolles.docker
       traefik_reverse_proxy: ~
 
-  static:
-    image: nginx
-    deploy:
-      labels:
-        - traefik.enable=true
-        - traefik.docker.network=traefik_reverse_proxy
-        - traefik.docker.lbswarm=true
-        - traefik.http.services.eyrolles_honyasan_product-manager-static-nginx.loadbalancer.server.port=80
-        - traefik.http.routers.eyrolles_honyasan_product-manager-static-nginx.entryPoints=web
-        - traefik.http.routers.eyrolles_honyasan_product-manager-static-nginx.rule=Host(`product-manager.eyrolles.docker`) && PathPrefix(`/build/`,`/bundles/`,`/media/`,`/favicon.ico`) && Method(`GET`)
-        - traefik.http.routers.eyrolles_honyasan_product-manager-static-nginx-https.entrypoints=websecure
-        - traefik.http.routers.eyrolles_honyasan_product-manager-static-nginx-https.rule=Host(`product-manager.eyrolles.docker`) && PathPrefix(`/build/`,`/bundles/`,`/media/`,`/favicon.ico`) && Method(`GET`)
-        - traefik.http.routers.eyrolles_honyasan_product-manager-static-nginx-https.tls.certresolver=letsencrypt
+  php:
+    image: github.com/Dieek26/gratuite-inscription/php-fpm:dev
     configs:
-      - source: static_conf
-        target: /etc/nginx/conf.d/default.conf
+      - source: php_conf
+        target: /usr/local/etc/php/php.ini
     volumes:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
-      - /home/gabriel/Workspace/Eyrolles/Honyasan/ProductManager/public:/var/www/product_manager/public:ro
+      - ..:/var/www/app
+      - composer:/var/www/.composer
+    environment:
+      - APP_ENV=dev
+      - APP_DEBUG=1
     networks:
-      eyrolles_honyasan_common_minio_public: ~
-      traefik_reverse_proxy: ~
+      fastcgi: ~
 
 configs:
   php_conf:
-    file: ./config/php.ini
-  fpm_healthcheck_conf:
-    file: ./config/fpm-healthcheck.conf
+    file: ./php/php.ini
   nginx_conf:
-    file: ./config/nginx.conf
-  static_conf:
-    file: ./config/static.conf
+    file: ./nginx/nginx.conf
 
 volumes:
   composer: ~
 
 networks:
   fastcgi: ~
-  public:
-    driver: overlay
-    attachable: true
   traefik_reverse_proxy:
     external: true

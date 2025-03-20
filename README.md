@@ -30,3 +30,13 @@ $ docker swarm init
 ```shell
 $ docker stack deploy -c .docker/docker-compose-traefik.yaml traefik
 ```
+
+5 - Démarrez la stack du projet
+```shell
+$ make start
+```
+
+6 - Arrêter la stack du projet
+```shell
+$ make stop
+```
