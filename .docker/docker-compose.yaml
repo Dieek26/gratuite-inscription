@@ -28,7 +28,7 @@ services:
       traefik_reverse_proxy: ~
 
   php:
-    image: github.com/Dieek26/gratuite-inscription/php-fpm:dev
+    image: github.com/dieek26/gratuite-inscription/php-fpm:dev
     configs:
       - source: php_conf
         target: /usr/local/etc/php/php.ini
