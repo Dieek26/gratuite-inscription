@@ -7,6 +7,7 @@ Formulaire d'inscription pour la Gratuité
 Pour installer ce projet il faut disposer des outils suivant:
 
  * Git
+ * make
  * Docker (en mode swarm)
 
 ## Installation
@@ -28,6 +29,7 @@ $ docker swarm init
 
 4 - Démarrez la stack traefk _(Uniquement la première fois)_
 ```shell
+$ docker network create traefik_reverse_proxy --driver=overlay --scope=swarm
 $ docker stack deploy -c .docker/docker-compose-traefik.yaml traefik
 ```
 
@@ -39,4 +41,9 @@ $ make start
 6 - Arrêter la stack du projet
 ```shell
 $ make stop
+```
+
+7 - Ajouter les entrées DNS suivantes dans votre fichier `/etc/hosts`
+```
+127.0.0.1   gratuite-inscription.docker
 ```
