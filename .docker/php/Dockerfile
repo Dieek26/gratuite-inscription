@@ -6,7 +6,7 @@ FROM php:8.4-fpm AS base
 
 ## Install dependencies
 RUN apt update \
-    && apt install -y git rsync libzip-dev zip \
+    && apt install -y git rsync libzip-dev zip libpq-dev libicu-dev \
     # Install pdo & pgsql
     && docker-php-ext-install pdo pgsql pdo_pgsql \
     # Install intl
@@ -21,7 +21,7 @@ RUN apt update \
     && docker-php-ext-install zip \
     # Instal pcntl
     && docker-php-ext-configure pcntl \
-    && docker-php-ext-install pcntl \
+    && docker-php-ext-install pcntl
 
 ## Add php.ini configuration and the entrypoint script
 ADD .docker/php/php.ini /usr/local/etc/php/php.ini
@@ -31,15 +31,15 @@ WORKDIR /var/www/app
 
 ## Copy App files
 #COPY composer.json composer.lock symfony.lock .env* package.json webpack.config.js ./
+COPY composer.json composer.lock symfony.lock .env* ./
 #COPY assets assets/
-#COPY bin bin/
-#COPY config config/
+COPY bin bin/
+COPY config config/
 #COPY migrations migrations/
-#COPY public public/
-#COPY src src/
+COPY public public/
+COPY src src/
 #COPY templates templates/
 #COPY translations translations/
-#COPY var/data var/data/
 
 ## Create empty var cache and var log directory
 RUN mkdir -p /var/www/app/var/cache /var/www/app/var/log
@@ -74,14 +74,14 @@ ENV NODE_VERSION=24
 
 ## Build assets
 RUN curl --silent -o- https://raw.githubusercontent.com/creationix/nvm/v0.31.2/install.sh | bash -
-RUN . $NVM_DIR/nvm.sh \
-    && nvm install $NODE_VERSION \
-    && nvm alias default $NODE_VERSION \
-    && nvm use default \
-    && npm install --global yarn \
-    && yarn --version \
-    && yarn install \
-    && yarn encore production
+#RUN . $NVM_DIR/nvm.sh \
+#    && nvm install $NODE_VERSION \
+#    && nvm alias default $NODE_VERSION \
+#    && nvm use default \
+#    && npm install --global yarn \
+#    && yarn --version \
+#    && yarn install \
+#    && yarn encore production
 
 ENV NODE_PATH=$NVM_DIR/v$NODE_VERSION/lib/node_modules
 ENV PATH=$NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
@@ -93,7 +93,7 @@ ENV PATH=$NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
 FROM build AS dev
 
 ## Install xDebug (putted at the end - CLUDGE)
-RUN pecl install xdebug-3.2.1 && docker-php-ext-enable xdebug
+RUN pecl install xdebug-3.4.2 && docker-php-ext-enable xdebug
 
 #####################
 ### STAGE 3: Prod ###
