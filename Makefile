@@ -77,7 +77,7 @@ push-image:
 
 # PROJECT
 .PHONY: start
-start:
+start: build-image
 	docker stack deploy -c .docker/docker-compose.yaml $(stack_name)
 
 .PHONY: stop
