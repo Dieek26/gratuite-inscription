@@ -6,7 +6,7 @@ php_sources = src/
 php_container_id = $(shell docker ps --filter name="$(stack_name)_php" -q)
 user = $(shell id -u)
 
-node_version = 24
+node_version = 22
 
 default: console
 

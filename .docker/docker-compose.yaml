@@ -22,7 +22,7 @@ services:
     volumes:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
-#      - ../public:/var/www/app/public
+      - ../public:/var/www/app/public
     networks:
       fastcgi: ~
       traefik_reverse_proxy: ~

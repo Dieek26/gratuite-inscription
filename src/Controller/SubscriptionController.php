@@ -8,7 +8,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class SubscriptionController extends AbstractController
 {
-    #[Route('/', name: 'app_subscription')]
+    #[Route('/subscription', name: 'app_subscription')]
     public function subscription(): Response
     {
         $number = random_int(0, 100);
